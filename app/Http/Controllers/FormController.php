@@ -3,87 +3,47 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
-use App\Models\Field;
 use Illuminate\Http\Request;
 
 class FormController extends Controller
 {
-    // GET /api/forms
     public function index()
     {
-        return Form::with('fields')->get();
+        $forms = Form::withCount('submissions')->get();
+        return response()->json($forms);
     }
 
-    // POST /api/forms
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'title' => 'required|string',
-            'description' => 'nullable|string',
-            'fields' => 'required|array',
+        $request->validate([
+            'title' => 'required|string|max:255'
         ]);
 
-        $form = Form::create([
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-        ]);
+        $form = Form::create($request->only('title'));
 
-        foreach ($data['fields'] as $i => $field) {
-            $form->fields()->create([
-                'label'    => $field['label'],
-                'type'     => $field['type'],
-                'required' => $field['required'] ?? false,
-                'order'    => $i,
-                'options'  => $field['options'] ?? null,
-            ]);
-        }
-
-        return response()->json($form->load('fields'), 201);
+        return response()->json($form, 201);
     }
 
-    // GET /api/forms/{form}
     public function show(Form $form)
     {
-        return $form->load('fields');
+        $form->load('fields');
+        return response()->json($form);
     }
 
-    // PUT /api/forms/{form}
     public function update(Request $request, Form $form)
     {
-        $data = $request->validate([
-            'title' => 'sometimes|string',
-            'description' => 'nullable|string',
-            'fields' => 'nullable|array',
+        $request->validate([
+            'title' => 'required|string|max:255'
         ]);
 
-        $form->update($data);
+        $form->update($request->only('title'));
 
-        if (isset($data['fields'])) {
-            $form->fields()->delete(); // replace old fields
-            foreach ($data['fields'] as $i => $field) {
-                $form->fields()->create([
-                    'label'    => $field['label'],
-                    'type'     => $field['type'],
-                    'required' => $field['required'] ?? false,
-                    'order'    => $i,
-                    'options'  => $field['options'] ?? null,
-                ]);
-            }
-        }
-
-        return $form->load('fields');
+        return response()->json($form);
     }
 
-    // DELETE /api/forms/{form}
     public function destroy(Form $form)
     {
         $form->delete();
-        return response()->json(['message' => 'Form deleted']);
-    }
-
-    // GET /api/forms/{form}/preview
-    public function preview(Form $form)
-    {
-        return $form->load('fields');
+        return response()->json(null, 204);
     }
 }
