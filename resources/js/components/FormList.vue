@@ -7,29 +7,52 @@
             </router-link>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 col-lg-4 mb-4" v-for="form in forms" :key="form.id">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ form.title }}</h5>
-                        <p class="card-text">{{ form.fields_count }} field(s)</p>
-                        <p class="card-text">
-                            <span class="badge bg-success">{{ form.submissions_count }} submissions</span>
-                        </p>
-                    </div>
-                    <div class="card-footer d-flex justify-content-between">
-                        <button class="btn btn-sm btn-info" @click="previewForm(form)">
-                            <i class="fas fa-eye me-1"></i> Preview
-                        </button>
-                        <router-link :to="`/forms/${form.id}/edit`" class="btn btn-sm btn-primary">
-                            <i class="fas fa-edit me-1"></i> Edit
-                        </router-link>
-                        <router-link :to="`/forms/${form.id}/submissions`" class="btn btn-sm btn-warning">
-                            <i class="fas fa-list me-1"></i> Submissions
-                        </router-link>
-                        <button class="btn btn-sm btn-danger" @click="deleteForm(form)">
-                            <i class="fas fa-trash me-1"></i> Delete
-                        </button>
+        <div v-if="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div v-else>
+            <div v-if="forms.length === 0" class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>No Forms Created Yet</h5>
+                <p>Get started by creating your first form!</p>
+                <router-link to="/forms/create" class="btn btn-primary">
+                    Create Your First Form
+                </router-link>
+            </div>
+
+            <div v-else class="row">
+                <div class="col-md-6 col-lg-4 mb-4" v-for="form in forms" :key="form.id">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ form.title }}</h5>
+                            <p class="card-text text-muted">
+                                <small>{{ form.fields_count || 0 }} field(s)</small>
+                            </p>
+                            <p class="card-text">
+                                <span class="badge" :class="form.submissions_count > 0 ? 'bg-success' : 'bg-secondary'">
+                                    {{ form.submissions_count || 0 }} submissions
+                                </span>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group w-100" role="group">
+                                <button class="btn btn-sm btn-outline-info" @click="previewForm(form)" title="Preview">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <router-link :to="`/forms/${form.id}/edit`" class="btn btn-sm btn-outline-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </router-link>
+                                <router-link :to="`/forms/${form.id}/submissions`" class="btn btn-sm btn-outline-warning" title="Submissions">
+                                    <i class="fas fa-list"></i>
+                                </router-link>
+                                <button class="btn btn-sm btn-outline-danger" @click="deleteForm(form)" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,7 +67,8 @@ export default {
     name: 'FormList',
     data() {
         return {
-            forms: []
+            forms: [],
+            loading: true
         }
     },
     mounted() {
@@ -52,25 +76,31 @@ export default {
     },
     methods: {
         fetchForms() {
-            axios.get('/forms')
+            this.loading = true;
+            axios.get('/api/forms')
                 .then(response => {
                     this.forms = response.data;
                 })
                 .catch(error => {
                     console.error('Error fetching forms:', error);
+                    alert('Error loading forms');
+                })
+                .finally(() => {
+                    this.loading = false;
                 });
         },
         previewForm(form) {
             this.$router.push(`/forms/${form.id}/preview`);
         },
         deleteForm(form) {
-            if (confirm(`Are you sure you want to delete "${form.title}"?`)) {
-                axios.delete(`/forms/${form.id}`)
+            if (confirm(`Are you sure you want to delete "${form.title}"? This action cannot be undone.`)) {
+                axios.delete(`/api/forms/${form.id}`)
                     .then(() => {
                         this.fetchForms();
                     })
                     .catch(error => {
                         console.error('Error deleting form:', error);
+                        alert('Error deleting form');
                     });
             }
         }
