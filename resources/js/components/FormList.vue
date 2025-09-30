@@ -75,35 +75,33 @@ export default {
         this.fetchForms();
     },
     methods: {
-        fetchForms() {
-            this.loading = true;
-            axios.get('/api/forms')
-                .then(response => {
-                    this.forms = response.data;
+    fetchForms() {
+        this.loading = true;
+        // Remove /api prefix since baseURL already has it
+        axios.get('/forms')  // Changed from '/api/forms'
+            .then(response => {
+                this.forms = response.data;
+            })
+            .catch(error => {
+                console.error('Error fetching forms:', error);
+                alert('Error loading forms');
+            })
+            .finally(() => {
+                this.loading = false;
+            });
+    },
+    deleteForm(form) {
+        if (confirm(`Are you sure you want to delete "${form.title}"? This action cannot be undone.`)) {
+            axios.delete(`/forms/${form.id}`)  // Changed from '/api/forms/${form.id}'
+                .then(() => {
+                    this.fetchForms();
                 })
                 .catch(error => {
-                    console.error('Error fetching forms:', error);
-                    alert('Error loading forms');
-                })
-                .finally(() => {
-                    this.loading = false;
+                    console.error('Error deleting form:', error);
+                    alert('Error deleting form');
                 });
-        },
-        previewForm(form) {
-            this.$router.push(`/forms/${form.id}/preview`);
-        },
-        deleteForm(form) {
-            if (confirm(`Are you sure you want to delete "${form.title}"? This action cannot be undone.`)) {
-                axios.delete(`/api/forms/${form.id}`)
-                    .then(() => {
-                        this.fetchForms();
-                    })
-                    .catch(error => {
-                        console.error('Error deleting form:', error);
-                        alert('Error deleting form');
-                    });
-            }
         }
     }
+}
 }
 </script>

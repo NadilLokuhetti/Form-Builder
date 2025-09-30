@@ -147,7 +147,7 @@ export default {
     methods: {
         fetchSubmissions() {
             this.loading = true;
-            axios.get(`/api/forms/${this.id}/submissions`)
+            axios.get(`/forms/${this.id}/submissions`)
                 .then(response => {
                     this.submissions = response.data;
                 })
@@ -160,7 +160,7 @@ export default {
                 });
         },
         fetchFormTitle() {
-            axios.get(`/api/forms/${this.id}`)
+            axios.get(`/forms/${this.id}`)
                 .then(response => {
                     this.formTitle = response.data.title;
                 document.title = `Submissions - ${this.formTitle} | Form Builder`;

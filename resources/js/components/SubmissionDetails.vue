@@ -146,7 +146,7 @@ export default {
     methods: {
         fetchSubmission() {
             this.loading = true;
-            axios.get(`/api/submissions/${this.id}`)
+            axios.get(`/submissions/${this.id}`)
                 .then(response => {
                     this.submission = response.data;
                     document.title = `Submission #${this.submission.id} | Form Builder`;
@@ -188,7 +188,7 @@ export default {
         deleteSubmission() {
             if (confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
                 this.deleting = true;
-                axios.delete(`/api/submissions/${this.id}`)
+                axios.delete(`/submissions/${this.id}`)
                     .then(() => {
                         this.$router.push(`/forms/${this.submission.form_id}/submissions`);
                     })

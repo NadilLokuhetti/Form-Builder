@@ -122,7 +122,7 @@ export default {
     },
     methods: {
         fetchForm(id) {
-            axios.get(`/api/forms/${id}`)
+            axios.get(`/forms/${id}`)
                 .then(response => {
                     this.form = response.data;
                     this.initializeFormData();
@@ -151,7 +151,7 @@ export default {
             this.submitting = true;
 
             if (this.id) {
-                axios.post(`/api/forms/${this.id}/submissions`, {
+                axios.post(`/forms/${this.id}/submissions`, {
                     data: this.previewData
                 })
                 .then(response => {

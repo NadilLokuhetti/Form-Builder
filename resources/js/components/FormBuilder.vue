@@ -121,7 +121,7 @@ export default {
     },
     methods: {
         fetchForm(id) {
-            axios.get(`/api/forms/${id}`)
+            axios.get(`/forms/${id}`)
                 .then(response => {
                     this.form = response.data;
                 })
@@ -165,7 +165,7 @@ export default {
         removeField(field, index) {
             if (confirm('Are you sure you want to remove this field?')) {
                 if (field.id) {
-                    axios.delete(`/api/fields/${field.id}`)
+                    axios.delete(`/fields/${field.id}`)
                         .then(() => {
                             this.form.fields.splice(index, 1);
                             this.updateFieldOrder();
@@ -210,8 +210,8 @@ export default {
             if (!this.validateForm()) return;
             
             const request = this.isEditing 
-                ? axios.put(`/api/forms/${this.form.id}`, this.form)
-                : axios.post('/api/forms', this.form);
+                ? axios.put(`/forms/${this.form.id}`, this.form)
+                : axios.post('/forms', this.form);
             
             request.then(response => {
                 this.$router.push('/forms');
