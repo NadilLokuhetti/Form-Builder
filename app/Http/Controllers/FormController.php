@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/FormController.php
 
 namespace App\Http\Controllers;
 
@@ -15,35 +16,60 @@ class FormController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255'
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'fields' => 'required|array'
         ]);
 
-        $form = Form::create($request->only('title'));
+        $form = Form::create($validated);
 
-        return response()->json($form, 201);
+        foreach ($request->fields as $fieldData) {
+            $form->fields()->create([
+                'type' => $fieldData['type'],
+                'label' => $fieldData['label'],
+                'options' => $fieldData['options'] ?? null,
+                'required' => $fieldData['required'] ?? false,
+                'order' => $fieldData['order'] ?? 0
+            ]);
+        }
+
+        return response()->json($form->load('fields'));
     }
 
     public function show(Form $form)
     {
-        $form->load('fields');
-        return response()->json($form);
+        return response()->json($form->load('fields'));
     }
 
     public function update(Request $request, Form $form)
     {
-        $request->validate([
-            'title' => 'required|string|max:255'
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'fields' => 'required|array'
         ]);
 
-        $form->update($request->only('title'));
+        $form->update($validated);
 
-        return response()->json($form);
+        $form->fields()->delete();
+
+        foreach ($request->fields as $fieldData) {
+            $form->fields()->create([
+                'type' => $fieldData['type'],
+                'label' => $fieldData['label'],
+                'options' => $fieldData['options'] ?? null,
+                'required' => $fieldData['required'] ?? false,
+                'order' => $fieldData['order'] ?? 0
+            ]);
+        }
+
+        return response()->json($form->load('fields'));
     }
 
     public function destroy(Form $form)
     {
         $form->delete();
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Form deleted successfully']);
     }
 }

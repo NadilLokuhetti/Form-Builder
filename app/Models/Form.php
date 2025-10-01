@@ -4,21 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Form extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title'];
+    protected $fillable = ['title', 'description'];
 
-    public function fields(): HasMany
+    public function fields()
     {
-        return $this->hasMany(Field::class)->orderBy('order');
+        return $this->hasMany(FormField::class)->orderBy('order');
     }
 
-    public function submissions(): HasMany
+    public function submissions()
     {
-        return $this->hasMany(Submission::class);
+        return $this->hasMany(FormSubmission::class);
     }
 }
